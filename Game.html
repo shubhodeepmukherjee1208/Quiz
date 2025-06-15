@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Game</title>
+  <style>
+    :root {
+      --bg-color: #121212;
+      --text-color: #ffffff;
+      --container-bg: #1e1e1e;
+      --progress-bg: #333;
+      --progress-bar: #4CAF50;
+      --button-bg: #4CAF50;
+      --button-hover: #45a049;
+    }
+    body.light-mode {
+      --bg-color: #f0f0f0;
+      --text-color: #000000;
+      --container-bg: #ffffff;
+      --progress-bg: #ddd;
+      --progress-bar: #4CAF50;
+      --button-bg: #4CAF50;
+      --button-hover: #45a049;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 600px;
+      padding: 20px;
+      border-radius: 8px;
+      background-color: var(--container-bg);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+    }
+    h1, h2, h3 {
+      color: var(--text-color);
+    }
+    input[type="text"] {
+      padding: 10px;
+      width: 80%;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background-color: var(--button-bg);
+      color: white;
+      padding: 10px 20px;
+      margin: 10px 10px 0 0;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: var(--button-hover);
+    }
+    .progress {
+      width: 100%;
+      background-color: var(--progress-bg);
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+    .progress-bar {
+      height: 20px;
+      background-color: var(--progress-bar);
+      width: 0;
+      border-radius: 5px;
+    }
+    .certificate {
+      background: var(--container-bg);
+      padding: 30px;
+      border: 2px solid var(--progress-bar);
+      border-radius: 12px;
+      color: var(--text-color);
+    }
+    .certificate h1 {
+      color: var(--progress-bar);
+    }
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .theme-icon::before {
+      content: '\1F319';
+    }
+    body.light-mode .theme-icon::before {
+      content: '\2600';
+    }
+    .timer-bar {
+      height: 10px;
+      width: 100%;
+      background-color: #555;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .timer-fill {
+      height: 100%;
+      width: 100%;
+      background-color: red;
+      transition: width 1s linear;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="quiz-container">
+    <h1>Quiz Game</h1>
+    <input type="text" id="name" placeholder="Enter your name">
+    <div class="button-row">
+      <button onclick="startQuiz()">Start Quiz</button>
+      <button onclick="toggleTheme()" class="theme-icon"></button>
+    </div>
+  </div>
+
+  <script>
+    const allQuestions = [
+      { question: "What is the capital of France?", options: ["Paris", "London", "Berlin", "Madrid"], answer: "Paris" },
+      { question: "What is 5 + 7?", options: ["10", "12", "14", "11"], answer: "12" },
+      { question: "What is the symbol of gold?", options: ["Au", "Ag", "Gd", "Go"], answer: "Au" },
+      { question: "Which planet is known as the Red Planet?", options: ["Venus", "Saturn", "Mars", "Jupiter"], answer: "Mars" },
+      { question: "What is the value of π (Pi) approximately?", options: ["2.14", "3.14", "4.13", "1.41"], answer: "3.14" },
+      { question: "Who wrote 'Romeo and Juliet'?", options: ["Wordsworth", "Dickens", "Shakespeare", "Austen"], answer: "Shakespeare" },
+      { question: "Which gas do plants absorb?", options: ["Oxygen", "Hydrogen", "Nitrogen", "Carbon Dioxide"], answer: "Carbon Dioxide" },
+      { question: "Square root of 144?", options: ["11", "12", "13", "14"], answer: "12" },
+      { question: "SI unit of Force?", options: ["Pascal", "Joule", "Newton", "Watt"], answer: "Newton" },
+      { question: "Boiling point of water?", options: ["50°C", "75°C", "100°C", "120°C"], answer: "100°C" },
+      { question: "First element in periodic table?", options: ["Hydrogen", "Helium", "Lithium", "Oxygen"], answer: "Hydrogen" },
+      { question: "Which organ pumps blood?", options: ["Lungs", "Liver", "Heart", "Brain"], answer: "Heart" },
+      { question: "Who painted Mona Lisa?", options: ["Picasso", "Da Vinci", "Van Gogh", "Michelangelo"], answer: "Da Vinci" },
+      { question: "Fastest land animal?", options: ["Lion", "Cheetah", "Horse", "Tiger"], answer: "Cheetah" },
+      { question: "Planet with rings?", options: ["Earth", "Mars", "Saturn", "Venus"], answer: "Saturn" },
+      { question: "Chemical formula of water?", options: ["H2O", "O2", "CO2", "NaCl"], answer: "H2O" },
+      { question: "Number of continents?", options: ["5", "6", "7", "8"], answer: "7" },
+      { question: "Largest mammal?", options: ["Elephant", "Blue Whale", "Giraffe", "Shark"], answer: "Blue Whale" },
+      { question: "Which festival is Festival of Lights?", options: ["Holi", "Diwali", "Eid", "Christmas"], answer: "Diwali" },
+      { question: "2 x 6 = ?", options: ["8", "10", "12", "14"], answer: "12" }
+    ];
+
+    let questions = [];
+    let currentIndex = 0;
+    let score = 0;
+    let userName = "";
+    let timerInterval;
+    let timeLeft = 15;
+    let userAnswers = [];
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle("light-mode");
+    }
+
+    function startQuiz() {
+      userName = document.getElementById("name").value.trim();
+      if (!userName) {
+        alert("Please enter your name.");
+        return;
+      }
+      questions = [...allQuestions];
+      shuffleArray(questions);
+      questions = questions.slice(0, 10);
+      questions.forEach(q => shuffleArray(q.options));
+      currentIndex = 0;
+      score = 0;
+      userAnswers = [];
+      showQuestion();
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      timeLeft = 15;
+      const fill = document.getElementById("fill");
+      if (fill) fill.style.width = "100%";
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        if (fill) fill.style.width = `${(timeLeft / 15) * 100}%`;
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          autoSubmitAnswer();
+        } else {
+          const timerEl = document.getElementById("timer");
+          if (timerEl) timerEl.innerText = `Time Left: ${timeLeft}s`;
+        }
+      }, 1000);
+    }
+
+    function showQuestion() {
+      const q = questions[currentIndex];
+      const percent = Math.floor((currentIndex / questions.length) * 100);
+      const container = document.getElementById("quiz-container");
+      container.innerHTML = `
+        <div class='progress'><div class='progress-bar' style='width:${percent}%;'></div></div>
+        <h2>${q.question}</h2>
+        ${q.options.map(opt => `<div><input type='radio' name='option' value='${opt}'> ${opt}</div>`).join('')}
+        <div class='timer-bar'><div id='fill' class='timer-fill'></div></div>
+        <p id='timer'>Time Left: 15s</p>
+        <div class='button-row'>
+          <button onclick='submitAnswer()'>Submit</button>
+          <button onclick='toggleTheme()' class='theme-icon'></button>
+        </div>
+      `;
+      startTimer();
+    }
+
+    function autoSubmitAnswer() {
+      userAnswers.push(null);
+      currentIndex++;
+      if (currentIndex < questions.length) {
+        showQuestion();
+      } else {
+        showResult();
+      }
+    }
+
+    function submitAnswer() {
+      clearInterval(timerInterval);
+      const selected = document.querySelector("input[name='option']:checked");
+      const userAns = selected ? selected.value : null;
+      userAnswers.push(userAns);
+      if (userAns === questions[currentIndex].answer) {
+        score++;
+      }
+      currentIndex++;
+      if (currentIndex < questions.length) {
+        showQuestion();
+      } else {
+        showResult();
+      }
+    }
+
+    function showResult() {
+      const container = document.getElementById("quiz-container");
+      let review = questions.map((q, i) => {
+        const userAns = userAnswers[i];
+        let status, color;
+        if (userAns === null) {
+          status = "Skipped";
+          color = "gray";
+        } else if (userAns === q.answer) {
+          status = "Correct";
+          color = "lightgreen";
+        } else {
+          status = "Wrong";
+          color = "red";
+        }
+        return `
+          <li>
+            <strong>Q${i + 1}:</strong> ${q.question}<br>
+            Your Answer: <span style='color:${color}'>${userAns ?? "No answer"}</span><br>
+            Correct Answer: <span style='color:lightgreen'>${q.answer}</span> <br>
+            <em>Status: <span style='color:${color}'>${status}</span></em>
+          </li>`;
+      }).join('');
+
+      container.innerHTML = `
+        <div class='certificate'>
+          <h1>Certificate of Completion</h1>
+          <p>This certifies that <strong>${userName}</strong> successfully completed the quiz.</p>
+          <h2>Score: ${score} / ${questions.length}</h2>
+          <hr>
+          <h3>Review:</h3>
+          <ul>${review}</ul>
+          <div class='button-row'>
+            <button onclick='location.reload()'>Restart Quiz</button>
+            <button onclick='toggleTheme()' class='theme-icon'></button>
+          </div>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

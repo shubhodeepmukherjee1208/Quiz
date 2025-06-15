@@ -144,7 +144,7 @@
       { question: "Largest mammal?", options: ["Elephant", "Blue Whale", "Giraffe", "Shark"], answer: "Blue Whale" },
       { question: "Which festival is Festival of Lights?", options: ["Holi", "Diwali", "Eid", "Christmas"], answer: "Diwali" },
       { question: "2 x 6 = ?", options: ["8", "10", "12", "14"], answer: "12" }
-    ]; //Can add more questions as you want 
+    ];
 
     let questions = [];
     let currentIndex = 0;
@@ -244,44 +244,50 @@
     }
 
     function showResult() {
-      const container = document.getElementById("quiz-container");
-      let review = questions.map((q, i) => {
-        const userAns = userAnswers[i];
-        let status, color;
-        if (userAns === null) {
-          status = "Skipped";
-          color = "gray";
-        } else if (userAns === q.answer) {
-          status = "Correct";
-          color = "lightgreen";
-        } else {
-          status = "Wrong";
-          color = "red";
-        }
-        return `
-          <li>
-            <strong>Q${i + 1}:</strong> ${q.question}<br>
-            Your Answer: <span style='color:${color}'>${userAns ?? "No answer"}</span><br>
-            Correct Answer: <span style='color:lightgreen'>${q.answer}</span> <br>
-            <em>Status: <span style='color:${color}'>${status}</span></em>
-          </li>`;
-      }).join('');
-
-      container.innerHTML = `
-        <div class='certificate'>
-          <h1>Certificate of Completion</h1>
-          <p>This certifies that <strong>${userName}</strong> successfully completed the quiz.</p>
-          <h2>Score: ${score} / ${questions.length}</h2>
-          <hr>
-          <h3>Review:</h3>
-          <ul>${review}</ul>
-          <div class='button-row'>
-            <button onclick='location.reload()'>Restart Quiz</button>
-            <button onclick='toggleTheme()' class='theme-icon'></button>
-          </div>
-        </div>
-      `;
+  const container = document.getElementById("quiz-container");
+  let review = questions.map((q, i) => {
+    const userAns = userAnswers[i];
+    let status, color;
+    if (userAns === null) {
+      status = "Skipped";
+      color = "gray";
+    } else if (userAns === q.answer) {
+      status = "Correct";
+      color = "lightgreen";
+    } else {
+      status = "Wrong";
+      color = "red";
     }
+    return `
+      <li style="margin-bottom: 10px;">
+        <strong>Q${i + 1}:</strong> ${q.question}<br>
+        Your Answer: <span style='color:${color}'>${userAns ?? "No answer"}</span><br>
+        Correct Answer: <span style='color:lightgreen'>${q.answer}</span><br>
+        <em>Status: <span style='color:${color}'>${status}</span></em>
+      </li>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div class='certificate'>
+      <div style="border: 4px dashed var(--progress-bar); padding: 20px; border-radius: 12px;">
+        <h1 style="font-size: 2.5em;">🏆 Certificate of Achievement</h1>
+        <p>This certificate is proudly presented to</p>
+        <h2 style="font-size: 2em; color: var(--progress-bar); margin: 10px 0;">${userName}</h2>
+        <p>for successfully completing the quiz.</p>
+        <h2>Score: <span style="color: var(--progress-bar);">${score} / ${questions.length}</span></h2>
+        <p class='signature'>Date: ${new Date().toLocaleDateString()}</p>
+      </div>
+      <hr style="margin: 30px 0;">
+      <h3 style="text-align: left;">Review:</h3>
+      <ul style="text-align: left; list-style-position: inside;">${review}</ul>
+      <div class='button-row' style="margin-top: 20px;">
+        <button onclick='location.reload()'>Restart Quiz</button>
+        <button onclick='toggleTheme()' class='theme-icon'></button>
+      </div>
+    </div>
+  `;
+}
+
   </script>
 </body>
 </html>
